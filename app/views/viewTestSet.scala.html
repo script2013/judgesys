@@ -1,0 +1,20 @@
+@(testSetId: String)
+
+@defining(models.Query.listQueriesByTestSetId(testSetId)) { queries =>
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+
+<ul>
+    @queries.map { query =>
+    <li><a href="@routes.Application.viewDocuments(query.id.toString)">@query.description</a></li>
+    }
+</ul>
+
+</body>
+</html>
+}

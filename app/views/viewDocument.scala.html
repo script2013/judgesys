@@ -1,0 +1,29 @@
+@(docData: ViewDocumentData)
+
+@defining(models.Document.listPossibleLabels()) { labels =>
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+Query @{docData.query.key}
+<br>
+Doc @{docData.document.key}
+
+
+
+<hr>
+
+    <form method="get" action="@{routes.Application.saveAnswer(docData.document.id.toString)}">
+        @labels.map { label =>
+                <input onclick="this.form.submit();" type="radio" name="relevance" value="@{label.name}">@label.name <br>
+        }
+    </form>
+
+
+
+</body>
+</html>
+}
