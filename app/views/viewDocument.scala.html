@@ -1,5 +1,9 @@
 @(docData: ViewDocumentData)
 
+@isChecked(label: String) = @{
+    if (label == docData.document.getRelevance()) "checked=\"checked\"" else ""
+}
+
 @defining(models.Document.listPossibleLabels()) { labels =>
 <!DOCTYPE html>
 <html>
@@ -11,15 +15,21 @@
 Query @{docData.query.key}
 <br>
 Doc @{docData.document.key}
-
-
+<br>
+Relevance: @{docData.document.getRelevance()}
 
 <hr>
+     <a href="@{routes.Application.viewDocuments(docData.query.id.toString)}">Back to All Documents</a>
 
-    <form method="get" action="@{routes.Application.saveAnswer(docData.document.id.toString)}">
+    <a href="@{routes.Application.prevDoc(docData.document.id.toString)}">Prev</a>
+    <a href="@{routes.Application.nextDoc(docData.document.id.toString)}">Next</a>
+    <hr/>
+
+    <form method="post" action="@{routes.Application.saveAnswer(docData.document.id.toString)}">
         @labels.map { label =>
-                <input onclick="this.form.submit();" type="radio" name="relevance" value="@{label.name}">@label.name <br>
+            <input @{isChecked(label.name)} type="radio" name="relevance" value="@{label.name}">@label.name <br>
         }
+        <input type="submit" value="Submit">
     </form>
 
 

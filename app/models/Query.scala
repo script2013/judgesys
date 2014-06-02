@@ -29,19 +29,11 @@ object Query extends QueryDAO with QueryJson{
     dao.findOneById(queryId) //MongoDBObject("id" -> queryId))
   }
 
-  def getNextDoc(queryId: ObjectId, docId: ObjectId): Option[Query] = {
-    None
-  }
-
-  def listQueries(userName: String): List[Query] = {
-    val queries = Query.findAll().toList
-    queries
-  }
 
   def listQueriesByTestSetId(testSetIdStr: String): List[Query] = {
     val testSetId = new ObjectId(testSetIdStr)
     val sortField = MongoDBObject("id" -> 1)
-    val queries = Query.findAll().sort(orderBy = sortField).withFilter(q => q.testSetId == testSetId) .toList
+    val queries = Query.findAll().sort(orderBy = sortField).withFilter(q => q.testSetId == testSetId).toList
     queries
   }
 }

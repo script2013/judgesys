@@ -19,30 +19,72 @@ case class Document( id: ObjectId = new ObjectId,
                      queryId: ObjectId,
                      key: String,
                      description: String,
-                     url: String
-                    )
+                     url: String,
+                     relevance: String = null
+                    ){
+  def getRelevance () = {
+    if (relevance == null){
+      "unjudged"
+    }
+    else{
+      relevance
+    }
+  }
+}
 
 object Document extends DocumentDAO with DocumentJson{
+  //https://github.com/novus/salat/wiki/SalatDAO
+  def getNextDoc(queryId: ObjectId, docId: ObjectId): Option[Document] = {
+    val sortField = MongoDBObject("id" -> 1)
+    val seqDocs =
+      Document.findAll().
+               sort(orderBy = sortField).
+               withFilter(doc => doc.queryId == queryId).
+               withFilter(doc => doc.id.compareTo(docId) > 0).
+               toSeq
+    seqDocs.headOption
+  }
+
+  def getPrevDoc(queryId: ObjectId, docId: ObjectId): Option[Document] = {
+    val sortField = MongoDBObject("id" -> 1)
+    val seqDocs =
+      Document.findAll().
+        sort(orderBy = sortField).
+        withFilter(doc => doc.queryId == queryId).
+        withFilter(doc => doc.id.compareTo(docId) < 0).
+        toSeq
+    seqDocs.headOption
+  }
+
+  def saveRelevance(docId: ObjectId, relevance: String): Boolean = {
+    //val writeRes = dao.update(MongoDBObject("id" -> docId), MongoDBObject("relevance" -> relevance), false, false,  new WriteConcern)
+
+    val doc = findDocumentById(docId.toString).get
+    val writeRes = dao.save(doc.copy(relevance = relevance))
+
+    writeRes.getLastError().ok()
+  }
 
   def findDocumentById(docIdStr: String): Option[Document] = {
     val docId = new ObjectId(docIdStr)
     println("find doc: " + docId)
     val res = dao.findOneById(docId) //MongoDBObject("id" -> docId))
     println("found resdoc: " + res)
-
     res
   }
 
   def listDocumentsByQueryId(queryIdStr: String): List[Document] = {
     val queryId = new ObjectId(queryIdStr)
-    val docs = Document.findAll().withFilter(d => d.queryId == queryId).toList
+    val sortField = MongoDBObject("id" -> 1)
+    val docs = Document.findAll().sort(orderBy = sortField).withFilter(d => d.queryId == queryId).toList
     docs
   }
 
   def listPossibleLabels(): List[Label] = {
     List( Label(name = "Highly Relevant"),
           Label(name = "Relevant"),
-          Label(name = "Non-relevant")
+          Label(name = "Non-relevant"),
+          Label(name = "Unjudged")
     )
   }
 
@@ -71,7 +113,8 @@ trait DocumentJson {
         "queryId" -> d.queryId,
         "key" -> d.key,
         "description" -> d.description,
-        "url" -> d.url
+        "url" -> d.url,
+        "relevance" -> d.relevance
       )
     }
   }
@@ -81,7 +124,8 @@ trait DocumentJson {
       (__ \ 'queryId).read[ObjectId] ~
       (__ \ 'key).read[String] ~
       (__ \ 'description).read[String] ~
-      (__ \ 'url).read[String]
+      (__ \ 'url).read[String] ~
+      (__ \ 'relevance).read[String]
     )(Document.apply _)
 }
 

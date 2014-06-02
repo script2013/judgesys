@@ -12,11 +12,13 @@ GET     /users                      controllers.Application.users
 GET     /queries                    controllers.Application.queries
 
 GET     /viewDocument/:id                   controllers.Application.viewDocument(id: String)
+GET     /nextDoc/:id                   controllers.Application.nextDoc(id: String)
+GET     /prevDoc/:id                   controllers.Application.prevDoc(id: String)
 
 GET     /viewTestSet/:id                   controllers.Application.viewTestSet(id: String)
 GET     /viewDocuments/:id                 controllers.Application.viewDocuments(id: String)
 
-GET     /saveAnswer/:id                   controllers.Application.saveAnswer(id: String)
+POST     /saveAnswer/:id                   controllers.Application.saveAnswer(id: String)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

@@ -1,6 +1,6 @@
-@(testSetId: String)
+@(viewData: ViewTestData)
 
-@defining(models.Query.listQueriesByTestSetId(testSetId)) { queries =>
+@defining(models.Query.listQueriesByTestSetId(viewData.testSet.id.toString)) { queries =>
 <!DOCTYPE html>
 <html>
 <head lang="en">
@@ -8,10 +8,13 @@
     <title></title>
 </head>
 <body>
+@viewData.testSet.description
+<hr/>
+<a href="@routes.Application.index2"> Back to start </a>
 
 <ul>
     @queries.map { query =>
-    <li><a href="@routes.Application.viewDocuments(query.id.toString)">@query.description</a></li>
+        <li><a href="@routes.Application.viewDocuments(query.id.toString)">@query.description</a></li>
     }
 </ul>
 

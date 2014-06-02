@@ -1,6 +1,6 @@
-@(queryId: String)
+@(queryData: ViewQueryData)
 
-@defining(models.Document.listDocumentsByQueryId(queryId)) { documents =>
+@defining(models.Document.listDocumentsByQueryId(queryData.query.id.toString)) { documents =>
 <!DOCTYPE html>
 <html>
 <head lang="en">
@@ -8,10 +8,13 @@
     <title></title>
 </head>
 <body>
-
+@queryData.query.description
+<hr/>
+<a href="@routes.Application.viewTestSet(queryData.query.testSetId.toString)"> Back to TestSet</a>
+<hr/>
 <ul>
     @documents.map { document =>
-    <li><a href="@routes.Application.viewDocument(document.id.toString)">@document.key &nbsp; @document.description </a></li>
+    <li><a href="@routes.Application.viewDocument(document.id.toString)">@document.key &nbsp; @document.description &nbsp; @{document.getRelevance()} </a></li>
     }
 </ul>
 

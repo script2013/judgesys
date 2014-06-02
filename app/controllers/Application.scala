@@ -4,10 +4,25 @@ import play.api._
 import play.api.mvc._
 import com.mongodb.WriteConcern
 import models._
+import org.bson.types.ObjectId
 
 case class MyValue(value: String)
 
+case class ViewTestData(testSet: TestSet, user: User)
+
+case class ViewQueryData(query: Query, user: User)
+
 case class ViewDocumentData(document: Document, query: Query, user: User)
+
+object ViewTestData{
+
+  def fromInput(user: User, testSetId: String): Option[ViewTestData] = {
+    for(
+      testSet <- TestSet.findTestSetById(testSetId)
+    ) yield ViewTestData(testSet, user)
+  }
+
+}
 
 object ViewDocumentData{
 
@@ -18,6 +33,18 @@ object ViewDocumentData{
     ) yield ViewDocumentData(doc, query, user)
   }
 
+}
+
+object ViewQueryData{
+  def fromInput(user: User, queryId: String): Option[ViewQueryData] = {
+    for(
+      query <- Query.findQueryById(queryId)
+    ) yield ViewQueryData(query, user)
+  }
+
+  def fromViewDocumentData(viewDocData: ViewDocumentData): ViewQueryData = {
+    ViewQueryData(viewDocData.query, viewDocData.user)
+  }
 }
 
 object Application extends Controller {
@@ -117,16 +144,30 @@ object Application extends Controller {
     )
   }
 
+  /*
   def saveAnswer2(queryId: String)  = Action { implicit request =>
     val res = answerForm.bindFromRequest.get
     Ok("Submitted queryId " + queryId + " " + res)
   }
+  */
 
   def saveAnswer(docId: String) = Action{implicit request =>
     withUser { (user: User) =>
       withOption (ViewDocumentData.fromInput(user, docId)) (viewDocData => {
-        //val nextDocId = Query.getNextDoc(viewDocData.query.id, docId)
-        Ok(views.html.viewDocument(viewDocData))
+        val res = answerForm.bindFromRequest.get
+        if (!Document.saveRelevance(new ObjectId(docId), res.value)){
+          throw new Exception("cannot save")
+        }
+
+        val docIdObj = new ObjectId(docId)
+        val maybeNextDocId = Document.getNextDoc(viewDocData.query.id, docIdObj)
+        maybeNextDocId match {
+          case Some(nextDocId) =>
+            withOption (ViewDocumentData.fromInput(user, nextDocId.id.toString)) (nextDocData => {
+              Ok(views.html.viewDocument(nextDocData))
+            })
+          case None => Ok(views.html.viewDocuments(ViewQueryData.fromViewDocumentData(viewDocData)))
+        }
       })
     }
   }
@@ -135,12 +176,52 @@ object Application extends Controller {
   //  Ok(views.html.viewQuery(queryId))
   //}
 
-  def viewTestSet(setId: String) = Action{ request =>
-    Ok(views.html.viewTestSet(setId))
+  def viewTestSet(setId: String) = Action{implicit request =>
+    withUser { (user: User) =>
+      withOption (ViewTestData.fromInput(user, setId)) (viewTestData => {
+        Ok(views.html.viewTestSet(viewTestData))
+      })
+    }
   }
 
-  def viewDocuments(queryId: String) = Action{ request =>
-    Ok(views.html.viewDocuments(queryId))
+  def viewDocuments(queryId: String) = Action{implicit request =>
+    withUser { (user: User) =>
+      withOption (ViewQueryData.fromInput(user, queryId)) (viewData => {
+        Ok(views.html.viewDocuments(viewData))
+      })
+    }
+  }
+
+  def nextDoc(docId: String) = Action{implicit request =>
+    withUser { (user: User) =>
+      withOption (ViewDocumentData.fromInput(user, docId)) (viewDocData => {
+        val docIdObj = new ObjectId(docId)
+        val maybeNextDocId = Document.getNextDoc(viewDocData.query.id, docIdObj)
+        maybeNextDocId match {
+          case Some(nextDocId) =>
+            withOption (ViewDocumentData.fromInput(user, nextDocId.id.toString)) (nextDocData => {
+              Ok(views.html.viewDocument(nextDocData))
+            })
+          case None => Ok(views.html.viewDocuments(ViewQueryData.fromViewDocumentData(viewDocData)))
+        }
+      })
+    }
+  }
+
+  def prevDoc(docId: String) = Action{implicit request =>
+    withUser { (user: User) =>
+      withOption (ViewDocumentData.fromInput(user, docId)) (viewDocData => {
+        val docIdObj = new ObjectId(docId)
+        val maybeNextDocId = Document.getPrevDoc(viewDocData.query.id, docIdObj)
+        maybeNextDocId match {
+          case Some(nextDocId) =>
+            withOption (ViewDocumentData.fromInput(user, nextDocId.id.toString)) (nextDocData => {
+              Ok(views.html.viewDocument(nextDocData))
+            })
+          case None => Ok(views.html.viewDocuments(ViewQueryData.fromViewDocumentData(viewDocData)))
+        }
+      })
+    }
   }
 
   def viewDocument(docId: String) = Action{implicit request =>

@@ -22,6 +22,11 @@ object TestSet extends TestSetDAO with TestSetJson{
   // Queries
   def findTestSetByKey(key: String): Option[TestSet] = dao.findOne(MongoDBObject("key" -> key))
 
+  def findTestSetById(testSetIdStr: String): Option[TestSet] = {
+    val testSetId = new ObjectId(testSetIdStr)
+    dao.findOneById(testSetId)
+  }
+
   def listTestSetsByUserId(userId: String): List[TestSet] = {
     val testSets = TestSet.findAll().toList
     testSets
