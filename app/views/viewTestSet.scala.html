@@ -1,23 +1,24 @@
 @(viewData: ViewTestData)
 
+@mainlayout(viewData.user.name) {
+
 @defining(models.Query.listQueriesByTestSetId(viewData.testSet.id.toString)) { queries =>
-<!DOCTYPE html>
-<html>
-<head lang="en">
-    <meta charset="UTF-8">
-    <title></title>
-</head>
-<body>
+
 @viewData.testSet.description
-<hr/>
-<a href="@routes.Application.index2"> Back to start </a>
 
-<ul>
+<table class="table table-hover">
+    <thead>
+    <tr>
+        <th>Question Names</th>
+    </tr>
+    </thead>
+    <tbody>
     @queries.map { query =>
-        <li><a href="@routes.Application.viewDocuments(query.id.toString)">@query.description</a></li>
+    <tr><td><a href="@routes.Application.viewDocuments(query.id.toString)">@query.description</a></td></tr>
     }
-</ul>
-
-</body>
-</html>
+    </tbody>
+</table>
 }
+
+}
+

@@ -1,23 +1,29 @@
 @(queryData: ViewQueryData)
 
+@mainlayout(queryData.user.name) {
+
 @defining(models.Document.listDocumentsByQueryId(queryData.query.id.toString)) { documents =>
-<!DOCTYPE html>
-<html>
-<head lang="en">
-    <meta charset="UTF-8">
-    <title></title>
-</head>
-<body>
+
 @queryData.query.description
+
 <hr/>
 <a href="@routes.Application.viewTestSet(queryData.query.testSetId.toString)"> Back to TestSet</a>
 <hr/>
-<ul>
-    @documents.map { document =>
-    <li><a href="@routes.Application.viewDocument(document.id.toString)">@document.key &nbsp; @document.description &nbsp; @{document.getRelevance()} </a></li>
-    }
-</ul>
 
-</body>
-</html>
+<table class="table table-hover">
+    <thead>
+    <tr>
+        <th>Question Names</th>
+    </tr>
+    </thead>
+    <tbody>
+    @documents.map { document =>
+    <tr><td><a href="@routes.Application.viewDocument(document.id.toString)">@document.key &nbsp; @document.description &nbsp; @{document.getRelevance()} </a></td></tr>
+    }
+    </tbody>
+</table>
 }
+
+}
+
+

@@ -1,28 +1,23 @@
 @(userName: String)
 
-<!DOCTYPE html>
-
 @import helper._
 
-@defining(models.TestSet.listTestSetsByUserId(userName)) { testSets =>
+@mainlayout(userName) {
 
-    <html>
-    <head>
-        <title>Main Page</title>
-        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
-        <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
-        </head>
-        <body>
-            <a href=@{routes.Application.logout}>Logout</a>
-            <h1>User: @userName</h1>
+    @defining(models.TestSet.listTestSetsByUserId(userName)) { testSets =>
 
-            <ul>
+        <table class="table table-hover">
+            <thead>
+            <tr>
+                <th>Testset Name</th>
+            </tr>
+            </thead>
+            <tbody>
                 @testSets.map { testSet =>
-                <li><a href="@routes.Application.viewTestSet(testSet.id.toString)">@testSet.description</a></li>
+                <tr><td><a href="@routes.Application.viewTestSet(testSet.id.toString)">@testSet.description</a></td></tr>
                 }
-            </ul>
-
-        </body>
-    </html>
+            </tbody>
+        </table>
+    }
 
 }

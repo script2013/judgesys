@@ -4,36 +4,30 @@
     if (label == docData.document.getRelevance()) "checked=\"checked\"" else ""
 }
 
-@defining(models.Document.listPossibleLabels()) { labels =>
-<!DOCTYPE html>
-<html>
-<head lang="en">
-    <meta charset="UTF-8">
-    <title></title>
-</head>
-<body>
-Query @{docData.query.key}
-<br>
-Doc @{docData.document.key}
-<br>
-Relevance: @{docData.document.getRelevance()}
+@mainlayout(docData.user.name) {
 
-<hr>
-     <a href="@{routes.Application.viewDocuments(docData.query.id.toString)}">Back to All Documents</a>
+    @defining(models.Document.listPossibleLabels()) { labels =>
 
-    <a href="@{routes.Application.prevDoc(docData.document.id.toString)}">Prev</a>
-    <a href="@{routes.Application.nextDoc(docData.document.id.toString)}">Next</a>
-    <hr/>
+    Query @{docData.query.key}
+    <br>
+    Doc @{docData.document.key}
+    <br>
+    Relevance: @{docData.document.getRelevance()}
 
-    <form method="post" action="@{routes.Application.saveAnswer(docData.document.id.toString)}">
-        @labels.map { label =>
-            <input @{isChecked(label.name)} type="radio" name="relevance" value="@{label.name}">@label.name <br>
-        }
-        <input type="submit" value="Submit">
-    </form>
+    <hr>
+         <a href="@{routes.Application.viewDocuments(docData.query.id.toString)}">Back to All Documents</a>
 
+        <a href="@{routes.Application.prevDoc(docData.document.id.toString)}">Prev</a>
+        <a href="@{routes.Application.nextDoc(docData.document.id.toString)}">Next</a>
+        <hr/>
 
+        <form method="post" action="@{routes.Application.saveAnswer(docData.document.id.toString)}">
+            @labels.map { label =>
+                <input @{isChecked(label.name)} type="radio" name="relevance" value="@{label.name}">@label.name <br>
+            }
+            <input type="submit" value="Submit">
+        </form>
 
-</body>
-</html>
+    }
+
 }

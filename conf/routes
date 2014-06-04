@@ -4,6 +4,9 @@
 
 # Home page
 GET     /                           controllers.Application.index
+
+
+
 GET     /index2                     controllers.Application.index2
 POST    /save                           controllers.Application.save
 GET     /logout                     controllers.Application.logout
@@ -22,3 +25,4 @@ POST     /saveAnswer/:id                   controllers.Application.saveAnswer(id
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
+
